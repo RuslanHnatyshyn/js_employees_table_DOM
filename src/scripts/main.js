@@ -195,7 +195,7 @@ submitButton.addEventListener('click', (e) => {
   notification.className = '';
 
   if (nameEmployee.length < 4) {
-    notification.textContent = 'Incorrect length of your name';
+    notification.textContent = 'Incorrect length of your name.';
     notification.classList.add('error');
 
     return;
