@@ -2,43 +2,40 @@
 
 // sort table
 const headers = [...document.querySelectorAll('table thead tr th')];
+let lastSortedKey = null;
+let sortReverse = false;
 
 headers.forEach((header) => {
   const indexHeader = headers.indexOf(header);
   const tBody = document.querySelector('table tbody');
-  let sortedRows;
-  let sortReverse = false;
 
   header.addEventListener('click', () => {
+    const key = header.textContent.trim();
     const rows = [...document.querySelectorAll('table tbody tr')];
 
-    if (
-      header.textContent === 'Name' ||
-      header.textContent === 'Position' ||
-      header.textContent === 'Office'
-    ) {
+    if (key !== lastSortedKey) {
+      sortReverse = false;
+    }
+
+    let sortedRows;
+
+    if (['Name', 'Position', 'Office'].includes(key)) {
       sortedRows = [...rows].sort((a, b) => {
         const aRow = a.children[indexHeader].textContent.trim();
         const bRow = b.children[indexHeader].textContent.trim();
 
-        return sortReverse === false
-          ? aRow.localeCompare(bRow)
-          : bRow.localeCompare(aRow);
+        return sortReverse
+          ? bRow.localeCompare(aRow)
+          : aRow.localeCompare(bRow);
       });
-
-      tBody.replaceChildren(...sortedRows);
-      sortReverse = !sortReverse;
-    } else if (header.textContent === 'Age') {
+    } else if (key === 'Age') {
       sortedRows = [...rows].sort((a, b) => {
         const aNumber = Number(a.cells[indexHeader].textContent);
         const bNumber = Number(b.cells[indexHeader].textContent);
 
-        return sortReverse === false ? aNumber - bNumber : bNumber - aNumber;
+        return sortReverse ? bNumber - aNumber : aNumber - bNumber;
       });
-
-      tBody.replaceChildren(...sortedRows);
-      sortReverse = !sortReverse;
-    } else if (header.textContent === 'Salary') {
+    } else if (key === 'Salary') {
       sortedRows = [...rows].sort((a, b) => {
         const aSalary = Number(
           a.cells[indexHeader].textContent.replace(/[^0-9.-]+/g, ''),
@@ -47,24 +44,14 @@ headers.forEach((header) => {
           b.cells[indexHeader].textContent.replace(/[^0-9.-]+/g, ''),
         );
 
-        return sortReverse === false ? aSalary - bSalary : bSalary - aSalary;
+        return sortReverse ? bSalary - aSalary : aSalary - bSalary;
       });
-
-      tBody.replaceChildren(...sortedRows);
-      sortReverse = !sortReverse;
-    } else {
-      sortedRows = [...rows].sort((a, b) => {
-        const aRow = a.cells[indexHeader].textContent.trim();
-        const bRow = b.cells[indexHeader].textContent.trim();
-
-        return sortReverse === false
-          ? aRow.localeCompare(bRow)
-          : bRow.localeCompare(aRow);
-      });
-
-      tBody.replaceChildren(...sortedRows);
-      sortReverse = !sortReverse;
     }
+
+    tBody.replaceChildren(...sortedRows);
+
+    lastSortedKey = key;
+    sortReverse = !sortReverse;
   });
 });
 
@@ -204,7 +191,7 @@ submitButton.addEventListener('click', (e) => {
     notification.classList.add('error');
 
     return;
-  } else if (position.length < 2) {
+  } else if (!position) {
     notification.textContent = 'Incorrect position';
     notification.classList.add('error');
 
